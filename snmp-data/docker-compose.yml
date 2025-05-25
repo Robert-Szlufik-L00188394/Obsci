@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  snmp-mock:
+    build: .
+    container_name: snmp-mock
+    ports:
+      - "16161:161/udp"
+    volumes:
+      - ./mock.snmprec:/app/data/mock.snmprec
+    environment:
+      - SNMPSIM_PROCESS_USER=nobody
+      - SNMPSIM_PROCESS_GROUP=nogroup
+    command: >
+      snmpsim-command-responder
+      --data-dir=/app/data
+      --agent-udpv4-endpoint=0.0.0.0:161
+    restart: unless-stopped
