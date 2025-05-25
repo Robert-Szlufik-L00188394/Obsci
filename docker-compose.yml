@@ -1,40 +1,49 @@
 services:
   influxdb:
     image: influxdb:2.7
+    container_name: influxdb
     ports:
       - "8086:8086"
-    volumes:
-      - influxdb-data:/var/lib/influxdb2
     environment:
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin123
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=obsci
       - DOCKER_INFLUXDB_INIT_PASSWORD=obsci123
       - DOCKER_INFLUXDB_INIT_ORG=obsci
       - DOCKER_INFLUXDB_INIT_BUCKET=metrics
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=super-secret-token
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+        - obsci-net
 
   telegraf:
     image: telegraf:1.30
     container_name: telegraf
+    depends_on:
+      - influxdb
+      - snmp-mock
     volumes:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-      - ./data/input:/data/input:ro
-    depends_on:
-      - influxdb
-    environment:
-      - HOST_PROC=/host/proc
-      - HOST_SYS=/host/sys
+    networks:
+      - obsci-net
 
-
-  grafana:
-    image: grafana/grafana:10.2.3
+  snmp-mock:
+    build: ./snmp-data
+    container_name: snmp-mock
     ports:
-      - "3000:3000"
-    depends_on:
-      - influxdb
-    volumes:
-      - grafana-storage:/var/lib/grafana
+      - "16161:16161/udp"
+    networks:
+      - obsci-net
+    command: >
+      sh -c "snmpsim-command-responder --data-dir=./data --agent-udpv4-endpoint=0.0.0.0:16161 --variation-modules=all"
+
+
 
 volumes:
-  influxdb-data:
-  grafana-storage:
+  influxdb_data:
+
+networks:
+  obsci-net:
+    name: obsci-net
