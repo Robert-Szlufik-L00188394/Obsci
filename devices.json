@@ -1,0 +1,4 @@
+[
+  { "ip": "2001:db8::1", "device_id": "pdu-01", "community": "public" },
+  { "ip": "2001:db8::2", "device_id": "pdu-02", "community": "public" }
+]

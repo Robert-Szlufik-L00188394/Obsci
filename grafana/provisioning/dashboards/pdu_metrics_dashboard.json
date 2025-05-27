@@ -1,0 +1,61 @@
+{
+  "id": null,
+  "title": "PDU Metrics Overview",
+  "tags": ["obsci"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Voltage (V)",
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt"
+        }
+      },
+      "targets": [
+        {
+          "query": "from(bucket: \"metrics\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"pdu_http\")\n  |> filter(fn: (r) => r._field == \"voltage\")\n  |> group(columns: [\"device_id\"])",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Current (A)",
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp"
+        }
+      },
+      "targets": [
+        {
+          "query": "from(bucket: \"metrics\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"pdu_http\")\n  |> filter(fn: (r) => r._field == \"current\")\n  |> group(columns: [\"device_id\"])",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Temperature (°C)",
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius"
+        }
+      },
+      "targets": [
+        {
+          "query": "from(bucket: \"metrics\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"pdu_http\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"device_id\"])",
+          "refId": "C"
+        }
+      ]
+    }
+  ],
+  "overwrite": true,
+  "folderId": 0
+}
