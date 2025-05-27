@@ -1,4 +1,26 @@
 [
-  { "ip": "2001:db8::1", "device_id": "pdu-01", "community": "public" },
-  { "ip": "2001:db8::2", "device_id": "pdu-02", "community": "public" }
+  {
+    "device_id": "pdu-01",
+    "ip": "2001:db8::1",
+    "community": "public",
+    "version": "2c",
+    "location": "Rack A1",
+    "model": "AP7921B"
+  },
+  {
+    "device_id": "pdu-02",
+    "ip": "2001:db8::2",
+    "community": "public",
+    "version": "2c",
+    "location": "Rack A2",
+    "model": "AP7921B"
+  },
+  {
+    "device_id": "pdu-03",
+    "ip": "2001:db8::3",
+    "community": "datacenter",
+    "version": "3",
+    "location": "Rack B1",
+    "model": "AP7922"
+  }
 ]
