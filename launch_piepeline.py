@@ -3,7 +3,9 @@ import shutil
 import subprocess
 import json
 import os
+from logger import setup_logger, log_docker_image_versions, log_telegraf_output
 
+logger = setup_logger()
 
 def generate_telegraf_config():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +57,7 @@ def generate_telegraf_config():
         if not required_keys.issubset(device):
             print(f"Skipping invalid device entry: {device}")
             continue
-        print(f"Including device: {device['device_id']} at {device['ip']}")
+        logger.info(f"Including SNMP device: {device['device_id']} at {device['ip']}")
         snmp_block = snmp_template.format(
             ip=device['ip'],
             version=device['version'],
@@ -81,6 +83,9 @@ def get_synthetic_telegraf_config():
 
 
 def start_pipeline(use_devices, use_synthetic):
+    logger.info("Starting pipeline")
+    mode = "Synthetic" if use_synthetic else "SNMP Devices"
+    logger.info(f"Mode: {mode}")
     if use_devices:
         print("Generating config for telegraf from devices...")
         generate_telegraf_config()
@@ -100,7 +105,15 @@ def start_pipeline(use_devices, use_synthetic):
         return
 
     print("Pipeline starting...")
-    # subprocess.run(['docker', 'compose', 'up', '-d'], check=True)
+    log_docker_image_versions([
+        'grafana/grafana:10.2.3',
+        'influxdb:2.7',
+        'telegraf:1.30'
+    ], logger)
+
+    subprocess.run(['docker', 'compose', 'up', '--build', '-d'], check=True)
+    log_telegraf_output(logger)
+
 
 
 if __name__ == '__main__':

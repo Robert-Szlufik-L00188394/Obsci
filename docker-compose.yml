@@ -57,17 +57,6 @@ services:
     networks:
       - obsci-net
 
-#  snmp-mock:
-#    build: ./snmp-data
-#    container_name: snmp-mock
-#    ports:
-#      - "16161:16161/udp"
-#    networks:
-#      - obsci-net
-#    command: >
-#      sh -c "snmpsim-command-responder --data-dir=./data --agent-udpv4-endpoint=0.0.0.0:16161 --variation-modules=all"
-
-
 
 volumes:
   influxdb_data:
