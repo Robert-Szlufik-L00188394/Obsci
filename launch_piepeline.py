@@ -3,7 +3,8 @@ import shutil
 import subprocess
 import json
 import os
-from logger import setup_logger, log_docker_image_versions, log_telegraf_output
+import time
+from logger import setup_logger, log_docker_image_versions, periodic_container_info_logger, stop_event
 
 logger = setup_logger()
 
@@ -112,7 +113,16 @@ def start_pipeline(use_devices, use_synthetic):
     ], logger)
 
     subprocess.run(['docker', 'compose', 'up', '--build', '-d'], check=True)
-    log_telegraf_output(logger)
+    log_thread = periodic_container_info_logger(logger, 'telegraf', interval=10)
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received. Stopping log thread...")
+        stop_event.set()
+        log_thread.join()
+        logger.info("Pipeline stopped cleanly.")
 
 
 

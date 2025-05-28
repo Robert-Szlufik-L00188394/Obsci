@@ -2,7 +2,8 @@ import logging
 import subprocess
 import os
 from daytime import datetime
-from logging.handlers import TimedRotatingFileHandler
+import time
+import threading
 
 def setup_logger():
     log_dir = os.path.join(os.path.dirname(__file__), 'logs')
@@ -62,3 +63,31 @@ def log_telegraf_output(logger, container_name='telegraf'):
             logger.warning("Failed to get Telegraf logs.")
     except Exception as e:
         logger.error(f"Error reading Telegraf logs: {e}")
+
+stop_event = threading.Event()
+def periodic_container_info_logger(logger, container_name='telegraf', interval=10):
+    print("Starting periodic Telegraf log tailing...")
+    logger.info("Starting periodic Telegraf log tailing...")
+    def loop():
+        print("inside def loop")
+        while True:
+            print("inside while loop")
+            try:
+                result = subprocess.run(
+                    ['docker', 'logs', '--tail', '20', container_name],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,  # Merge both streams
+                    text=True
+                )
+                print('result', result)
+                if result.returncode == 0:
+                    logger.info("Telegraf log tail:\n" + result.stdout)
+                else:
+                    logger.warning("Failed to get Telegraf logs.")
+            except Exception as e:
+                logger.error(f"Error reading Telegraf logs: {e}")
+            time.sleep(interval)
+
+    print("Starting thread")
+    thread = threading.Thread(target=loop)
+    thread.start()
